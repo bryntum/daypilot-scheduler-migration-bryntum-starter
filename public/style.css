@@ -1,0 +1,25 @@
+* {
+  margin: 0;  
+}
+
+.space {
+  padding: 0.5rem;
+}
+
+#btnAddGroup {
+  padding: 0.5rem;
+  background-color: rgba(39, 202, 55, 0.05);
+  color: rgb(39, 202, 55);
+  border: 1px solid rgba(39, 202, 55, 0.3);
+  border-radius: 2px;
+}
+
+#btnAddGroup:hover {
+  background-color: rgb(182, 231, 188);
+  transition: background-color .2s, color .2s, border .2s;
+}
+
+#dp .scheduler_default_cellparent, .scheduler_default_cell.scheduler_default_cell_business.scheduler_default_cellparent 
+{
+  background: #f3f3f3;
+}

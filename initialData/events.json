@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "text": "Reservation 1",
+    "start": "2024-07-15T00:00:00",
+    "end": "2024-07-19T00:00:00",
+    "resource": 111
+  },
+  {
+    "id": 2,
+    "text": "Reservation 2",
+    "start": "2024-07-16T00:00:00",
+    "end": "2024-07-21T00:00:00",
+    "resource": 112
+  },
+  {
+    "id": 3,
+    "text": "Reservation 3",
+    "start": "2024-07-19T00:00:00",
+    "end": "2024-07-21T00:00:00",
+    "resource": 113
+  },
+  {
+    "id": 4,
+    "text": "Reservation 4",
+    "start": "2024-07-15T00:00:00",
+    "end": "2024-07-18T00:00:00",
+    "resource": 121
+  },
+  {
+    "id": 5,
+    "text": "Reservation 5",
+    "start": "2024-07-16T00:00:00",
+    "end": "2024-07-21T00:00:00",
+    "resource": 122
+  },
+  {
+    "id": 6,
+    "text": "Reservation 6",
+    "start": "2024-07-19T00:00:00",
+    "end": "2024-07-21T00:00:00",
+    "resource": 123
+  },
+  {
+    "id": 7,
+    "text": "Reservation 7",
+    "start": "2024-07-15T00:00:00",
+    "end": "2024-07-17T00:00:00",
+    "resource": 123
+  },
+  {
+    "id": 8,
+    "text": "Reservation 8",
+    "start": "2024-07-20T00:00:00",
+    "end": "2024-07-22T00:00:00",
+    "resource": 111
+  },
+  {
+    "id": 9,
+    "text": "Reservation 9",
+    "start": "2024-07-23T00:00:00",
+    "end": "2024-07-26T00:00:00",
+    "resource": 122
+  },
+  {
+    "id": 10,
+    "text": "Reservation 10",
+    "start": "2024-07-23T00:00:00",
+    "end": "2024-07-26T00:00:00",
+    "resource": 111
+  }
+]

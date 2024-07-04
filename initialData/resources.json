@@ -1,0 +1,8 @@
+[
+  { "id": 111, "name": "Room 1", "group_id": 11, "ordinal": 1 },
+  { "id": 112, "name": "Room 2", "group_id": 11, "ordinal": 2 },
+  { "id": 113, "name": "Room 3", "group_id": 11, "ordinal": 3 },
+  { "id": 121, "name": "Lakeside cottage", "group_id": 12, "ordinal": 1 },
+  { "id": 122, "name": "Forest treehouse", "group_id": 12, "ordinal": 2 },
+  { "id": 123, "name": "Hilltop hideaway", "group_id": 12, "ordinal": 3 }
+]
