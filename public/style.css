@@ -2,24 +2,41 @@
   margin: 0;  
 }
 
-.space {
-  padding: 0.5rem;
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-size: 14px;
 }
 
-#btnAddGroup {
-  padding: 0.5rem;
-  background-color: rgba(39, 202, 55, 0.05);
-  color: rgb(39, 202, 55);
-  border: 1px solid rgba(39, 202, 55, 0.3);
-  border-radius: 2px;
+.b-tree-cell-value .info {
+  display: flex;
+  gap: 0.5rem;
 }
 
-#btnAddGroup:hover {
-  background-color: rgb(182, 231, 188);
-  transition: background-color .2s, color .2s, border .2s;
+.b-tree-cell-value .info .name{
+  font-weight:400;
 }
 
-#dp .scheduler_default_cellparent, .scheduler_default_cell.scheduler_default_cell_business.scheduler_default_cellparent 
-{
-  background: #f3f3f3;
+.b-tree-cell-value .add {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+  background-color:transparent;
+  color:#888;
+  border-radius:50%;
+  width:1.25em;
+  height: 1.25em;
+  margin-inline-end:1em;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+
+.b-tree-cell-value .add:hover {
+  background-color:#888;
+  color:#fff;
+  width:1.25em;
+  height:1.25em;
+  transition:all 0.3s;
 }

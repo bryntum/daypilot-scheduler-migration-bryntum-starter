@@ -3,3 +3,5 @@
 .env
 node_modules/
 .vscode
+public/scripts
+database.sqlite3

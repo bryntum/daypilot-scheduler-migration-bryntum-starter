@@ -1,7 +1,14 @@
 import bodyParser from "body-parser";
 import express from "express";
 import path from "path";
-import { Event, Resource, ResourceGroup } from "./models/index.js";
+import {
+  BryntumAssignment,
+  BryntumEvent,
+  BryntumResource,
+  Event,
+  Resource,
+  ResourceGroup,
+} from "./models/index.js";
 import { localDateTimeISOString } from "./utils.js";
 
 global.__dirname = path.resolve();
@@ -10,8 +17,9 @@ const port = 1337;
 const app = express();
 
 app.use(express.static(path.join(__dirname, "public")));
-
-
+app.use(
+  express.static(path.join(__dirname, "/node_modules/@bryntum/scheduler"))
+);
 app.use(bodyParser.json());
 
 app.get("/api/events", async (req, res) => {
@@ -199,7 +207,194 @@ app.post("/api/updateEvent", async (req, res) => {
   }
 });
 
+app.get("/api/load", async (req, res) => {
+  try {
+    const resourcesPromise = BryntumResource.findAll({
+      order: [["index", "ASC"]],
+    });
+    const eventsPromise = BryntumEvent.findAll();
+    const assignmentsPromise = BryntumAssignment.findAll();
+    const [resources, events, assignments] = await Promise.all([
+      resourcesPromise,
+      eventsPromise,
+      assignmentsPromise,
+    ]);
+
+    const resourcesMod = resources.map((resource) => {
+      if (resource.parentId) {
+        return { ...resource.dataValues };
+      } else {
+        return { ...resource.dataValues, expanded: true };
+      }
+    });
+
+    res
+      .send({
+        resources: { rows: resourcesMod },
+        events: { rows: events },
+        assignments: { rows: assignments },
+      })
+      .status(200);
+  } catch (error) {
+    console.error({ error });
+    res.send({
+      success: false,
+      message:
+        "There was an error loading the resources, events, and assignments data.",
+    });
+  }
+});
+
+app.post("/api/sync", async function (req, res) {
+  const { requestId, assignments, events, resources } = req.body;
+  let eventMapping = {};
+
+  try {
+    const response = { requestId, success: true };
+    if (resources) {
+      const rows = await applyTableChanges("resources", resources);
+      // if new data to update client
+      if (rows) {
+        response.resources = { rows };
+      }
+    }
+    if (events) {
+      const rows = await applyTableChanges("events", events);
+      if (rows) {
+        if (events?.added) {
+          rows.forEach((row) => {
+            eventMapping[row.$PhantomId] = row.id;
+          });
+        }
+        response.events = { rows };
+      }
+    }
+    if (assignments) {
+      if (events && events?.added) {
+        assignments.added.forEach((assignment) => {
+          assignment.eventId = eventMapping[assignment.eventId];
+        });
+      }
+      const rows = await applyTableChanges("assignments", assignments);
+      if (rows) {
+        response.assignments = { rows };
+      }
+    }
+    res.send(response);
+  } catch (error) {
+    console.error({ error });
+    res.send({
+      requestId,
+      success: false,
+      message: "There was an error syncing the data changes.",
+    });
+  }
+});
+
 // Start server
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+async function applyTableChanges(table, changes) {
+  let rows;
+  if (changes.added) {
+    rows = await createOperation(changes.added, table);
+  }
+  if (changes.updated) {
+    await updateOperation(changes.updated, table);
+  }
+  if (changes.removed) {
+    await deleteOperation(changes.removed, table);
+  }
+  // if got some new data to update client
+  return rows;
+}
+
+function createOperation(added, table) {
+  return Promise.all(
+    added.map(async (record) => {
+      const { $PhantomId, ...data } = record;
+      let id;
+      // Insert record into the table.rows array
+      if (table === "assignments") {
+        const assignment = await BryntumAssignment.create(data);
+        id = assignment.id;
+      }
+      if (table === "events") {
+        const event = await BryntumEvent.create(data);
+        id = event.id;
+      }
+      if (table === "resources") {
+        // determine index number - add 1 to it
+        // child resource
+        if (data.parentId) {
+          const maxIndex = await BryntumResource.max("index", {
+            where: { parentId: data.parentId },
+          });
+          const resource = await BryntumResource.create({
+            ...data,
+            index: maxIndex + 1,
+          });
+          id = resource.id;
+          // parent resource
+        } else {
+          const maxIndex = await BryntumResource.max("index", {
+            where: { parentId: null },
+          });
+          const resource = await BryntumResource.create({
+            ...data,
+            index: maxIndex + 1,
+          });
+          id = resource.id;
+        }
+      }
+      // report to the client that we changed the record identifier
+      return { $PhantomId, id };
+    })
+  );
+}
+
+function deleteOperation(deleted, table) {
+  return Promise.all(
+    deleted.map(async ({ id }) => {
+      if (table === "assignments") {
+        await BryntumAssignment.destroy({
+          where: {
+            id: id,
+          },
+        });
+      }
+      if (table === "events") {
+        await BryntumEvent.destroy({
+          where: {
+            id: id,
+          },
+        });
+      }
+      if (table === "resources") {
+        await BryntumResource.destroy({
+          where: {
+            id: id,
+          },
+        });
+      }
+    })
+  );
+}
+
+function updateOperation(updated, table) {
+  return Promise.all(
+    updated.map(async ({ id, ...data }) => {
+      if (table === "assignments") {
+        await BryntumAssignment.update(data, { where: { id } });
+      }
+      if (table === "events") {
+        await BryntumEvent.update(data, { where: { id } });
+      }
+      if (table === "resources") {
+        await BryntumResource.update(data, { where: { id } });
+      }
+    })
+  );
+}
