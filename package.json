@@ -1,7 +1,7 @@
 {
   "name": "daypilot-scheduler-migrate-to-bryntum",
   "version": "1.0.0",
-  "description": "Starter repo for guide: Migrate from DayPilot Scheduler to Bryntum Scheduler: starter repository",
+  "description": "Starter repo for guide: Migrate from DayPilot Scheduler to Bryntum Scheduler",
   "main": "server.js",
   "type": "module",
   "dependencies": {
