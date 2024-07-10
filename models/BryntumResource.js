@@ -30,7 +30,7 @@ const BryntumResource = sequelize.define(
       },
       onDelete: "CASCADE", // This will delete all child resources referencing the resource when it's deleted
     },
-    index: {
+    parentIndex: {
       type: DataTypes.INTEGER,
       defaultValue: null,
     },
@@ -40,7 +40,7 @@ const BryntumResource = sequelize.define(
     timestamps: false,
     indexes: [
       {
-        fields: ["index", "parentId"],
+        fields: ["parentIndex", "parentId"],
       },
     ],
   }

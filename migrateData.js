@@ -35,7 +35,7 @@ async function migrateExampleData() {
       bryntumResource.id = resource_group.id;
       bryntumResource.name = resource_group.name;
       bryntumResource.parentId = null;
-      bryntumResource.index = resource_group.ordinal;
+      bryntumResource.parentIndex = resource_group.ordinal;
       bryntumResourcesData.push(bryntumResource);
     }
 
@@ -44,7 +44,7 @@ async function migrateExampleData() {
       bryntumResource.id = resource.id;
       bryntumResource.name = resource.name;
       bryntumResource.parentId = resource.group_id;
-      bryntumResource.index = resource.ordinal;
+      bryntumResource.parentIndex = resource.ordinal;
       bryntumResourcesData.push(bryntumResource);
     }
 

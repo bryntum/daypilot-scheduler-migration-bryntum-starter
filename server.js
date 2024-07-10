@@ -210,7 +210,7 @@ app.post("/api/updateEvent", async (req, res) => {
 app.get("/api/load", async (req, res) => {
   try {
     const resourcesPromise = BryntumResource.findAll({
-      order: [["index", "ASC"]],
+      order: [["parentIndex", "ASC"]],
     });
     const eventsPromise = BryntumEvent.findAll();
     const assignmentsPromise = BryntumAssignment.findAll();
@@ -312,6 +312,82 @@ async function applyTableChanges(table, changes) {
 }
 
 function createOperation(added, table) {
+  // handle copying resource parent with children - need to create parents before children
+  if (table === "resources" && added.length > 1) {
+    // check if there are parents
+    const parents = added.filter((resource) => resource.parentId === null);
+    const newIdsArray = [];
+
+    // Process parents and their children concurrently
+    const parentPromises = parents.map(async (parent) => {
+      // find children
+      const children = added.filter(
+        (resource) => resource.parentId === parent.$PhantomId
+      );
+
+      const parentMaxIndex = await BryntumResource.max("parentIndex", {
+        where: { parentId: null },
+      });
+      const parentResource = await BryntumResource.create({
+        ...parent,
+        parentIndex: parentMaxIndex + 1,
+      });
+      newIdsArray.push({
+        $PhantomId: parent.$PhantomId,
+        id: parentResource.id,
+      });
+
+      // create parent's children
+      if (children.length > 0) {
+        const childPromises = children.map(async (child) => {
+          const childMaxIndex = await BryntumResource.max("parentIndex", {
+            where: { parentId: parentResource.id },
+          });
+
+          const childResource = await BryntumResource.create({
+            ...child,
+            parentId: parentResource.id,
+            parentIndex: childMaxIndex + 1,
+          });
+          newIdsArray.push({
+            $PhantomId: child.$PhantomId,
+            id: childResource.id,
+          });
+        });
+        await Promise.all(childPromises);
+      }
+    });
+
+    return Promise.all(parentPromises).then(async () => {
+      // Handle children whose parents are not in the parents array
+      const remainingChildren = added.filter(
+        (resource) =>
+          resource.parentId !== null &&
+          !newIdsArray.some((newId) => newId.$PhantomId === resource.parentId)
+      );
+
+      const remainingChildPromises = remainingChildren.map(async (child) => {
+        const parentIdEntry = newIdsArray.find(
+          (newId) => newId.$PhantomId === child.parentId
+        );
+        const maxChildIndex = await BryntumResource.max("parentIndex", {
+          where: { parentId: child.parentId },
+        });
+        const childResource = await BryntumResource.create({
+          ...child,
+          parentId: parentIdEntry ? parentIdEntry.id : child.parentId,
+          parentIndex: maxChildIndex + 1,
+        });
+        newIdsArray.push({
+          $PhantomId: child.$PhantomId,
+          id: childResource.id,
+        });
+      });
+
+      await Promise.all(remainingChildPromises);
+      return newIdsArray;
+    });
+  }
   return Promise.all(
     added.map(async (record) => {
       const { $PhantomId, ...data } = record;
@@ -329,22 +405,22 @@ function createOperation(added, table) {
         // determine index number - add 1 to it
         // child resource
         if (data.parentId) {
-          const maxIndex = await BryntumResource.max("index", {
+          const maxIndex = await BryntumResource.max("parentIndex", {
             where: { parentId: data.parentId },
           });
           const resource = await BryntumResource.create({
             ...data,
-            index: maxIndex + 1,
+            parentIndex: maxIndex + 1,
           });
           id = resource.id;
           // parent resource
         } else {
-          const maxIndex = await BryntumResource.max("index", {
+          const maxIndex = await BryntumResource.max("parentIndex", {
             where: { parentId: null },
           });
           const resource = await BryntumResource.create({
             ...data,
-            index: maxIndex + 1,
+            parentIndex: maxIndex + 1,
           });
           id = resource.id;
         }
