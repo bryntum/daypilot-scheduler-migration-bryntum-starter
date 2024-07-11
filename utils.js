@@ -1,10 +1,10 @@
 export function localDateTimeISOString(localDateString) {
   const localDate = new Date(localDateString);
-  let d = new Date();
+  const d = new Date();
   d.setUTCFullYear(
-    localDate.getFullYear(),
-    localDate.getMonth(),
-    localDate.getDate()
+      localDate.getFullYear(),
+      localDate.getMonth(),
+      localDate.getDate()
   );
   d.setUTCHours(localDate.getHours());
   d.setUTCMinutes(localDate.getMinutes());
