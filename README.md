@@ -4,7 +4,7 @@
 
 Install the dependencies:
 
-```shell
+```bash
 npm install
 ```
 
