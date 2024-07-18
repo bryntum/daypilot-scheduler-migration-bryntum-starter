@@ -17,7 +17,7 @@ Create and populate a local SQLite database by running the `addExampleData.js` N
 node addExampleData.js
 ```
 
-Run the development server for this Express.js app using the following command:
+Run the development server for this Express app using the following command:
 
 ```bash
 npm run start
